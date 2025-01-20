@@ -1,0 +1,1 @@
+Get https://random-word-api.vercel.app/api?words=10
