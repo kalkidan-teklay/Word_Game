@@ -1,4 +1,5 @@
-let word = ''; // Global word variable
+let word = '';
+let result = 0; 
 
 function createInputBoxes(word) {
     const input_container = document.getElementById("input_boxes");
@@ -48,7 +49,7 @@ function shuffleString(str) {
 function checkAnswer() {
     const inputBoxes = document.querySelectorAll('.input-box');
     const score = document.getElementById("value");
-    let result = 0;
+    
     let userGuess = '';
 
     inputBoxes.forEach(input => {
@@ -62,6 +63,7 @@ function checkAnswer() {
         result+= 1
         resultMessage.textContent = "Correct! You guessed the word!";
         score.innerHTML = result;
+        fetchRandomWord();
     } else {
         resultMessage.textContent = "Incorrect! Try again.";
     }
