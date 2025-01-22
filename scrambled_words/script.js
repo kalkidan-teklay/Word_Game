@@ -47,6 +47,8 @@ function shuffleString(str) {
 
 function checkAnswer() {
     const inputBoxes = document.querySelectorAll('.input-box');
+    const score = document.getElementById("value");
+    let result = 0;
     let userGuess = '';
 
     inputBoxes.forEach(input => {
@@ -57,7 +59,9 @@ function checkAnswer() {
     console.log("word: ", word);
     console.log("userGuess: ", userGuess);
     if (userGuess.toLowerCase() === word.toLowerCase()) {
+        result+= 1
         resultMessage.textContent = "Correct! You guessed the word!";
+        score.innerHTML = result;
     } else {
         resultMessage.textContent = "Incorrect! Try again.";
     }

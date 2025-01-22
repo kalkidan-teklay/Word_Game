@@ -19,6 +19,12 @@ body{
 
 
 }
+.score_container{
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    align-self: flex-end;
+}
 
 .letters{
     display: inline-block; 
