@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up</title>
+    <style>
+        body {
+            font-family: cursive;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #5cb85c;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        #message {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+
+        .password-hint {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .password-strength {
+            margin-top: 5px;
+        }
+
+        .password-strength div {
+            height: 5px;
+            border-radius: 4px;
+        }
+
+        .weak {
+            width: 33%;
+            background-color: red;
+        }
+
+        .medium {
+            width: 66%;
+            background-color: orange;
+        }
+
+        .strong {
+            width: 100%;
+            background-color: green;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Signup Form</h2>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword"
+                    name="confirmPassword" required>
+                <span id="confirmPasswordError" class="error"></span>
+            </div>
+            <button type="submit">Signup</button>
+        </form>
+        <p >Already have an account? <a href="./login.html">Login</a></p>
+    </div>
+
+
+    <script>
+        document.getElementById("signupForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+    
+            const username = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+    
+            if (password !== confirmPassword) {
+                document.getElementById("confirmPasswordError").innerText = "Passwords do not match!";
+                return;
+            }
+    
+            const response = await fetch("http://localhost:8080/api/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, password }),
+            });
+    
+            const result = await response.json();
+    
+            if (response.ok) {
+                alert(result.message);
+                window.location.href = "./login.html";
+            } else {
+                alert(result.error);
+            }
+        });
+    </script>
+    
+</body>
+</html>
