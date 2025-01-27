@@ -119,13 +119,15 @@
         <p >Don't have an account yet? <a href="./signup.html">Signup</a></p>
     </div>
     <script>
+
+        let userId = null;
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
     try {
-        const response = await fetch("http://localhost:8080/api/login", {
+        const response = await fetch("http://localhost:8080/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -134,8 +136,11 @@
         });
 
         const result = await response.json();
+        console.log(result);
         if (response.ok) {
+            localStorage.setItem("userId", result.user_id);
             alert(result.message);
+            
             window.location.href = "./index.html"; // Show success message
         } else {
             alert(result.error); // Show error message
@@ -146,5 +151,6 @@
 });
 
     </script>
+    <script src="./script.js"></script>
 </body>
 </html>

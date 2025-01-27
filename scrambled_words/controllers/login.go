@@ -50,5 +50,7 @@ func Login(c *gin.Context) {
 	}
 
 	// If successful, return a success response
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login successful",
+		"user_id": user.ID.Hex()})
 }

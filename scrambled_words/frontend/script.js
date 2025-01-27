@@ -1,42 +1,61 @@
 let word = '';
-let result = 0; 
+let player_id = null; // Player's unique identifier
 
+// Create input boxes for the current word
 function createInputBoxes(word) {
-    const input_container = document.getElementById("input_boxes");
-    input_container.innerHTML = ''; 
+    const inputContainer = document.getElementById("input_boxes");
+    inputContainer.innerHTML = ''; 
     for (let char of word) {
         const input = document.createElement('input');
         input.type = 'text';
         input.maxLength = 1;
         input.className = 'input-box';
-        input_container.appendChild(input);
+        inputContainer.appendChild(input);
     }
 }
 
-async function fetchRandomWord() {
+
+// Start the game or fetch the first word
+async function startGame() {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+        alert("Please log in first.");
+        return;
+    }
+
     try {
-        const response = await fetch('https://random-word-api.herokuapp.com/word?number=1');
+        const response = await fetch('http://localhost:8080/start', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
         const data = await response.json();
-        
-        if (data.length > 0) {
-            word = data[0]; // Assign fetched word to global variable
-            console.log(word);
-            const shuffledWord = shuffleString(word);
-            const paragraph = document.getElementById("generated_text");
-            
-            createInputBoxes(word);
 
-            const wrappedText = shuffledWord.split('').map(letter => {
-                return `<span class="letters">${letter}</span>`;
-            }).join('');
-
-            paragraph.innerHTML = wrappedText; 
+        if (data.success) {
+            player_id = data.player_id; // Assign the player ID
+            word = data.word; // Get the word
+            displayWord(word); // Show the word
+        } else {
+            alert(data.message || 'Error starting the game.');
         }
     } catch (error) {
-        console.error('Error fetching random word:', error);
+        console.error('Error starting the game:', error);
     }
 }
 
+// Display the scrambled word
+function displayWord(word) {
+    const shuffledWord = shuffleString(word);
+    const paragraph = document.getElementById("generated_text");
+
+    const wrappedText = shuffledWord.split('').map(letter => {
+        return `<span class="letters">${letter}</span>`;
+    }).join('');
+
+    paragraph.innerHTML = wrappedText;
+    createInputBoxes(word);
+}
+
+// Shuffle a string (used for scrambling the word)
 function shuffleString(str) {
     const arr = str.split(''); 
     for (let i = arr.length - 1; i > 0; i--) {
@@ -46,28 +65,71 @@ function shuffleString(str) {
     return arr.join(''); 
 }
 
-function checkAnswer() {
+// Submit the player's guess
+async function checkAnswer() {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+        alert("Please log in first.");
+        return;
+    }
+
     const inputBoxes = document.querySelectorAll('.input-box');
-    const score = document.getElementById("value");
-    
     let userGuess = '';
 
     inputBoxes.forEach(input => {
-        userGuess += input.value.trim(); 
+        userGuess += input.value.trim();
     });
+    console.log("User ID:", userId); // Debugging
+    console.log("User Guess:", userGuess); // Debugging
 
-    const resultMessage = document.getElementById("result_message");
-    console.log("word: ", word);
-    console.log("userGuess: ", userGuess);
-    if (userGuess.toLowerCase() === word.toLowerCase()) {
-        result+= 1
-        resultMessage.textContent = "Correct! You guessed the word!";
-        score.innerHTML = result;
-        fetchRandomWord();
-    } else {
-        resultMessage.textContent = "Incorrect! Try again.";
+    try {
+        const response = await fetch('http://localhost:8080/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ player_id: userId, guess: userGuess }),
+        });
+
+        const data = await response.json();
+        const resultMessage = document.getElementById("result_message");
+
+        if (data.correct) {
+            resultMessage.textContent = "Correct! Next word loading...";
+            word = data.nextWord;
+            displayWord(word); // Display the next word
+        } else {
+            resultMessage.textContent = "Incorrect! Try again.";
+        }
+
+        // Update the scores
+        updateScores(data.scores);
+
+        // Check for winner
+        if (data.winner) {
+            alert(`Game Over! ${data.winner} wins!`);
+            window.location.reload(); // Reload the game
+        }
+    } catch (error) {
+        console.error('Error checking answer:', error);
     }
 }
 
-document.getElementById("submit_button").addEventListener("click", checkAnswer);
-window.onload = fetchRandomWord;
+// Update the score display
+function updateScores(scores) {
+    const scoreContainer = document.getElementById("score");
+    if (scores && Array.isArray(scores)) {
+        scoreContainer.innerHTML = `Scores: ${scores.map(score => `${score.name}: ${score.points}`).join(' | ')}`;
+    } else {
+        scoreContainer.innerHTML = "Scores: N/A"; // Handle undefined or invalid scores
+    }
+}
+
+// Event listeners
+document.addEventListener("DOMContentLoaded", function () {
+    const submitButton = document.getElementById("submit_button");
+    if (submitButton) {
+        submitButton.addEventListener("click", checkAnswer);
+    }
+
+    
+    window.onload = startGame;
+});

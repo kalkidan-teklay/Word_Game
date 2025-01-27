@@ -7,11 +7,9 @@ import (
 )
 
 func RegisterRoutes(r *gin.Engine) {
-	api := r.Group("/api")
-	{
-		api.POST("/signup", controllers.Signup)
-		api.POST("/login", controllers.Login)
-
-		// Add more routes here
-	}
+	r.POST("/signup", controllers.Signup)
+	r.POST("/login", controllers.Login)
+	r.POST("/join", controllers.JoinGame)
+	r.GET("/start", controllers.StartGame)
+	r.POST("/submit", controllers.SubmitAnswer)
 }

@@ -1,1 +1,7 @@
-Get https://random-word-api.vercel.app/api?words=10
+POST http://localhost:8080/submit
+Content-Type: application/json
+
+{
+    "player_id": "somePlayerId",
+    "guess": "someGuess"
+}
