@@ -10,6 +10,14 @@ function createInputBoxes(word) {
         input.type = 'text';
         input.maxLength = 1;
         input.className = 'input-box';
+      
+
+        input.addEventListener('input', (e) => {
+            const nextInput = input.nextElementSibling;
+            if (nextInput && nextInput.tagName === 'INPUT') {
+                nextInput.focus();
+            }
+        });
         inputContainer.appendChild(input);
     }
 }
