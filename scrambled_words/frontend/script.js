@@ -116,6 +116,7 @@ async function checkAnswer() {
 
         if (data.correct) {
             resultMessage.textContent = "Correct!";
+            resultMessage.style.color = "rgb(51, 83, 4)";
             const correctSound = document.getElementById("correct_sound");
                 correctSound.play(); 
             word = data.new_word;
@@ -123,6 +124,7 @@ async function checkAnswer() {
         } else {
             
             resultMessage.textContent = "Incorrect!";
+            resultMessage.style.color = "red";
             const IncorrectSound = document.getElementById("wrong-sound");
                 IncorrectSound.play(); 
         }
