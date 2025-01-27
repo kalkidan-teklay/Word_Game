@@ -18,6 +18,15 @@ function createInputBoxes(word) {
                 nextInput.focus();
             }
         });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && input.value === '') {
+                const previousInput = input.previousElementSibling;
+                if (previousInput && previousInput.tagName === 'INPUT') {
+                    previousInput.focus();
+                }
+            }
+        });
         inputContainer.appendChild(input);
     }
 }
@@ -99,13 +108,23 @@ async function checkAnswer() {
 
         const data = await response.json();
         const resultMessage = document.getElementById("result_message");
+        resultMessage.style.visibility = "visible";
+        resultMessage.style.animation = "fadeIn 1s ease, zoom-in-zoom-out 1s ease infinite"; 
+        setTimeout(() => {
+            resultMessage.style.visibility = "hidden";
+        }, 2000);
 
         if (data.correct) {
-            resultMessage.textContent = "Correct! Next word loading...";
+            resultMessage.textContent = "Correct!";
+            const correctSound = document.getElementById("correct_sound");
+                correctSound.play(); 
             word = data.new_word;
             displayWord(word); // Display the next word
         } else {
-            resultMessage.textContent = "Incorrect! Try again.";
+            
+            resultMessage.textContent = "Incorrect!";
+            const IncorrectSound = document.getElementById("wrong-sound");
+                IncorrectSound.play(); 
         }
 
         // Update the scores
