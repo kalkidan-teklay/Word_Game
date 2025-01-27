@@ -94,7 +94,7 @@ async function checkAnswer() {
 
         if (data.correct) {
             resultMessage.textContent = "Correct! Next word loading...";
-            word = data.nextWord;
+            word = data.new_word;
             displayWord(word); // Display the next word
         } else {
             resultMessage.textContent = "Incorrect! Try again.";
