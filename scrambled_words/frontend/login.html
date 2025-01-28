@@ -125,6 +125,7 @@
     <script>
 
         let userId = null;
+        let username = null;
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("email").value;
@@ -143,6 +144,7 @@
         console.log(result);
         if (response.ok) {
             localStorage.setItem("userId", result.user_id);
+            localStorage.setItem("username", result.username);
             alert(result.message);
             
             window.location.href = "./menu.html"; // Show success message

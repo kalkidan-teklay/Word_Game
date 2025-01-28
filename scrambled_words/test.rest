@@ -1,7 +1,8 @@
-POST http://localhost:8080/submit
+GET http://localhost:8080/ws
 Content-Type: application/json
 
-{
-    "player_id": "somePlayerId",
-    "guess": "someGuess"
-}
+"player": {
+        "id": "",
+        "name": "kal",
+        "score": 3
+    },

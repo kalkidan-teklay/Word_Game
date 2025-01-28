@@ -121,10 +121,7 @@ async function checkAnswer() {
             const correctSound = document.getElementById("correct_sound");
                 correctSound.play(); 
             word = data.new_word;
-            if (playerScore == 3) {
-                alert(`${data.player.name} won the game!`);
-                window.location.reload();
-            }
+            
             
             displayWord(word); // Display the next word
         } else {
@@ -171,4 +168,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
     
     window.onload = startGame;
+});
+
+
+// Connect to WebSocket
+const socket = new WebSocket('ws://localhost:8080/ws');
+
+// Handle WebSocket messages
+socket.addEventListener('message', (event) => {
+    const message = JSON.parse(event.data);
+
+    console.log('Received message:', message);
+    if (message.type === 'game_over') {
+        const winner = message.payload.winner;
+        const currentUser = localStorage.getItem("username");
+
+        if (currentUser === winner) {
+            alert("You won the game!");
+        } else {
+            alert(`${winner} won the game!`);
+        }
+
+        // Redirect to the game-over screen
+        window.location.href = "./gameover.html"; // Replace with your game-over screen URL
+    }
+});
+
+// Handle WebSocket errors
+socket.addEventListener('error', (error) => {
+    console.error('WebSocket error:', error);
+});
+
+// Handle WebSocket close
+socket.addEventListener('close', () => {
+    console.log('WebSocket connection closed');
 });

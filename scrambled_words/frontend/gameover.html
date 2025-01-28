@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Over</title>
+</head>
+<body>
+    <h1>Game Over</h1>
+    <p id="winner-message"></p>
+    <script>
+        // Display the winner's name
+        const winner = new URLSearchParams(window.location.search).get('winner');
+        document.getElementById('winner-message').textContent = `${winner} won the game!`;
+    </script>
+</body>
+</html>

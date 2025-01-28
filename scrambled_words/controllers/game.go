@@ -3,10 +3,12 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"scrambled_words/db"
 	"scrambled_words/models"
+	"scrambled_words/shared"
 	"strings"
 	"sync"
 	"time"
@@ -90,8 +92,8 @@ func StartGame(c *gin.Context) {
 
 // Submit answer
 func SubmitAnswer(c *gin.Context) {
-	mu.Lock()
-	defer mu.Unlock()
+	shared.Mu.Lock()
+	defer shared.Mu.Unlock()
 
 	var request struct {
 		PlayerID string `json:"player_id"`
@@ -133,6 +135,15 @@ func SubmitAnswer(c *gin.Context) {
 		if player.Score == 3 {
 			gameState.Winner = &player
 			gameState.Started = false
+			log.Println("Broadcasting game over for winner:", player.Name)
+
+			shared.Broadcast <- shared.Message{
+				Type: "game_over",
+				Payload: gin.H{
+					"winner":  player.Name,
+					"message": fmt.Sprintf("%s won the game!", player.Name),
+				},
+			}
 
 			_, err := collection.UpdateOne(
 				ctx,

@@ -13,4 +13,8 @@ func RegisterRoutes(r *gin.Engine) {
 	r.GET("/start", controllers.StartGame)
 	r.POST("/submit", controllers.SubmitAnswer)
 	r.GET("/leaderboard", controllers.GetLeaderboard)
+	r.GET("/ws", func(c *gin.Context) {
+		controllers.HandleWebSocket(c.Writer, c.Request)
+	})
+
 }
