@@ -52,17 +52,29 @@ func JoinGame(c *gin.Context) {
 		return
 	}
 
-	player.ID = time.Now().String() // Generate unique ID
 	player.Score = 0
 	gameState.Players = append(gameState.Players, player)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Player joined", "player": player})
+	playerNames := []string{}
+	for _, p := range gameState.Players {
+		playerNames = append(playerNames, p.Name)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":      "Player joined",
+		"player":       player,
+		"joined_users": playerNames, // List of player names
+	})
 }
 
 // Start the game
 func StartGame(c *gin.Context) {
 	mu.Lock()
 	defer mu.Unlock()
+
+	for i := range gameState.Players {
+		gameState.Players[i].Score = 0
+	}
 
 	if !gameState.Started {
 		generateWord()
@@ -118,14 +130,25 @@ func SubmitAnswer(c *gin.Context) {
 			return
 		}
 
-		if player.Score == 10 {
+		if player.Score == 3 {
 			gameState.Winner = &player
 			gameState.Started = false
+
+			_, err := collection.UpdateOne(
+				ctx,
+				bson.M{"_id": objID},
+				bson.M{"$inc": bson.M{"wins": 1}}, // Increment the "wins" field
+			)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update wins"})
+				return
+			}
 		} else {
 			generateWord()
 		}
+
 		c.JSON(http.StatusOK, gin.H{
-			"message":  "Correct!",
+			"message":  fmt.Sprintf("%s won the game!", player.Name),
 			"correct":  true,
 			"player":   player,
 			"new_word": gameState.Shuffled,

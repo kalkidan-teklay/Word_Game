@@ -107,6 +107,7 @@ async function checkAnswer() {
         });
 
         const data = await response.json();
+        const playerScore = data.player.score;
         const resultMessage = document.getElementById("result_message");
         resultMessage.style.visibility = "visible";
         resultMessage.style.animation = "fadeIn 1s ease, zoom-in-zoom-out 1s ease infinite"; 
@@ -120,6 +121,11 @@ async function checkAnswer() {
             const correctSound = document.getElementById("correct_sound");
                 correctSound.play(); 
             word = data.new_word;
+            if (playerScore == 3) {
+                alert(`${data.player.name} won the game!`);
+                window.location.reload();
+            }
+            
             displayWord(word); // Display the next word
         } else {
             
@@ -151,7 +157,11 @@ function updateScores(scores) {
         scoreContainer.innerHTML = "Scores: N/A"; // Handle undefined or invalid scores
     }
 }
+function checkWinner(playerScore) {
+    
+    
 
+}
 // Event listeners
 document.addEventListener("DOMContentLoaded", function () {
     const submitButton = document.getElementById("submit_button");
