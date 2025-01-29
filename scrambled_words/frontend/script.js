@@ -32,7 +32,8 @@ function createInputBoxes(word) {
 }
 
 
-// Start the game or fetch the first word
+window.onload = () => startGame(); 
+
 async function startGame() {
     const userId = localStorage.getItem("userId");
     if (!userId) {
@@ -59,18 +60,33 @@ async function startGame() {
     }
 }
 
+
+
+
 // Display the scrambled word
 function displayWord(word) {
     const shuffledWord = shuffleString(word);
     const paragraph = document.getElementById("generated_text");
 
-    const wrappedText = shuffledWord.split('').map(letter => {
-        return `<span class="letters">${letter}</span>`;
-    }).join('');
+    // Ensure the element exists and is available
+    if (paragraph) {
+        const wrappedText = shuffledWord.split('').map(letter => {
+            return `<span class="letters">${letter}</span>`;
+        }).join('');
 
-    paragraph.innerHTML = wrappedText;
-    createInputBoxes(word);
+        // Safely set the innerHTML only when the element exists
+        paragraph.innerHTML = wrappedText;
+
+        // Proceed with creating input boxes for the word
+        createInputBoxes(word);
+    } else {
+        console.error("The element with id 'generated_text' was not found.");
+    }
 }
+
+
+    
+
 
 // Shuffle a string (used for scrambling the word)
 function shuffleString(str) {
@@ -167,7 +183,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     
-    window.onload = startGame;
+    //window.onload = () => startGame(gameType); 
 });
 
 

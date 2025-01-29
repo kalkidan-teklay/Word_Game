@@ -12,6 +12,7 @@
             background-size: cover;
             background-color: #f4f4f4;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -31,6 +32,10 @@
             width: 330px;
             padding: 10px;
             margin-bottom: 10px;
+            font-family: cursive;
+            color: black;
+            font-weight: bold;
+            font-size: 24px;
         }
 
         a {
@@ -39,22 +44,36 @@
             color: black;
             font-weight: bold;
             font-size: 24px;
-            margin-left: 50px;
+            
         }
 
         nav ul {
             list-style-type: none;
+            display: flex;
+            flex-direction: column;
         }
     </style>
 </head>
 <body>
     <nav>
         <ul>
-            <li class="menu"><a href="./index.html">New Game</a></li>
-            <li class="menu"><a href="./continue.html">Continue</a></li> 
-            <li class="menu"><a href="./leaderboard.html">LeaderBoard</a></li>
-            <li class="menu"><a href="./multiplayer.html">MultiPlayer</a></li>
+            
+                <button class="menu" id="new-game-btn">New Game</button>
+             
+              
+                <button class="menu" id="continue-btn">Continue</button>
+              
+              
+                <button class="menu"><a href="./leaderboard.html">LeaderBoard</a></button>
+              
+              
+                <button class="menu"><a href="./help.html">Help</a></button>
+            
+            
+            
         </ul>
     </nav>
+    
+    <script src="./menu.js"></script>
 </body>
 </html>

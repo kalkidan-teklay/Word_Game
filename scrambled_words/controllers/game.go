@@ -70,6 +70,50 @@ func JoinGame(c *gin.Context) {
 }
 
 // Start the game
+func CheckMenu(c *gin.Context) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	var request struct {
+		PlayerID string `json:"player_id"` // The player's ID
+		Type     string `json:"type"`      // "new" for New Game, "continue" for Continue
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	collection := db.GetCollection("scrambled_words", "users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	objID, err := primitive.ObjectIDFromHex(request.PlayerID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Player ID"})
+		return
+	}
+
+	if request.Type == "new" {
+		// Reset only this player's score
+		_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": bson.M{"score": 0}})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reset score"})
+			return
+		}
+
+		for i := range gameState.Players {
+			if gameState.Players[i].ID == request.PlayerID {
+				gameState.Players[i].Score = 0
+				break
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+	})
+}
 func StartGame(c *gin.Context) {
 	mu.Lock()
 	defer mu.Unlock()
