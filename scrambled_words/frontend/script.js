@@ -179,18 +179,23 @@ socket.addEventListener('message', (event) => {
     const message = JSON.parse(event.data);
 
     console.log('Received message:', message);
+    const gameover = document.getElementById("game-over-container");
     if (message.type === 'game_over') {
         const winner = message.payload.winner;
         const currentUser = localStorage.getItem("username");
-
+        gameover.style.visibility = "visible";
         if (currentUser === winner) {
-            alert("You won the game!");
+            gameover.innerHTML = "🎉🎉YOU WON THE GAME!!"
+            //alert("You won the game!");
         } else {
+            gameover.innerHTML = "GAME OVER"
             alert(`${winner} won the game!`);
         }
-
+        setTimeout(() => {
+            window.location.href = "./menu.html";   
+        }, 4000);
         // Redirect to the game-over screen
-        window.location.href = "./gameover.html"; // Replace with your game-over screen URL
+        
     }
 });
 

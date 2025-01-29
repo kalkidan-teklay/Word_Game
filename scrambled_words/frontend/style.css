@@ -1,7 +1,7 @@
 body{
     
     font-family: cursive;
-    
+    position: relative; 
 }
 
 .container {
@@ -101,4 +101,24 @@ button {
 }
 button:hover{
     background-color: rgb(125, 202, 9);
+}
+
+.game-over-container{
+    background-color: rgba(255, 255, 255, 0.9); /* Light background */
+    padding: 20px;
+    border-radius: 10px;
+    display:flex;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+    position: fixed; /* Change to fixed to stay centered in the viewport */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust centering */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); 
+    width: 300px;
+    height: 200px; /* Adjust height to auto for content flexibility */
+    visibility: hidden; /* Initially hidden */
+    z-index: 100;
+
 }
