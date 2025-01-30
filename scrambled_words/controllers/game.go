@@ -69,14 +69,13 @@ func JoinGame(c *gin.Context) {
 	})
 }
 
-// Start the game
 func CheckMenu(c *gin.Context) {
 	mu.Lock()
 	defer mu.Unlock()
 
 	var request struct {
-		PlayerID string `json:"player_id"` // The player's ID
-		Type     string `json:"type"`      // "new" for New Game, "continue" for Continue
+		PlayerID string `json:"player_id"`
+		Type     string `json:"type"`
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -136,8 +135,10 @@ func StartGame(c *gin.Context) {
 
 // Submit answer
 func SubmitAnswer(c *gin.Context) {
+	log.Println("Acquiring lock in SubmitAnswer()")
 	shared.Mu.Lock()
 	defer shared.Mu.Unlock()
+	log.Println("Releasing lock in SubmitAnswer()")
 
 	var request struct {
 		PlayerID string `json:"player_id"`
@@ -175,6 +176,16 @@ func SubmitAnswer(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update score"})
 			return
 		}
+
+		for conn, p := range shared.Players {
+			if p.Name == player.Name {
+				p.Score = player.Score
+				shared.Players[conn] = p
+				break
+			}
+		}
+
+		go broadcastPlayerList()
 
 		if player.Score == 3 {
 			gameState.Winner = &player
@@ -216,32 +227,25 @@ func SubmitAnswer(c *gin.Context) {
 			"scores":  getScores(), // Include scores in the response
 		})
 	}
+
 }
 
-// Helper function to get scores of all players
+// Helper function to get scores of all online players
 func getScores() []map[string]interface{} {
-	collection := db.GetCollection("scrambled_words", "users")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	cursor, err := collection.Find(ctx, bson.M{})
-	if err != nil {
-		fmt.Println("Error fetching scores:", err)
-		return nil
-	}
-	defer cursor.Close(ctx)
+	mu.Lock()
+	defer mu.Unlock()
 
 	var scores []map[string]interface{}
-	for cursor.Next(ctx) {
-		var player models.Player
-		if err := cursor.Decode(&player); err != nil {
-			fmt.Println("Error decoding player:", err)
-			continue
-		}
+
+	// Iterate through the gameState.Players to get online players
+	for _, player := range gameState.Players {
 		scores = append(scores, map[string]interface{}{
 			"name":   player.Name,
 			"points": player.Score,
 		})
+	}
+	if len(scores) == 0 {
+		return []map[string]interface{}{}
 	}
 
 	return scores
@@ -254,4 +258,30 @@ func getPlayerByID(id string) *models.Player {
 		}
 	}
 	return nil
+}
+
+func LeaveGame(c *gin.Context) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	var request struct {
+		PlayerID string `json:"player_id"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	// Remove the player from the gameState.Players slice
+	for i, player := range gameState.Players {
+		if player.ID == request.PlayerID {
+			gameState.Players = append(gameState.Players[:i], gameState.Players[i+1:]...)
+			break
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Player left the game",
+	})
 }

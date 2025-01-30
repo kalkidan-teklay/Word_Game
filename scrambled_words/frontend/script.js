@@ -123,7 +123,7 @@ async function checkAnswer() {
         });
 
         const data = await response.json();
-        const playerScore = data.player.score;
+        const playerScore = data.player ? data.player.score : "N/A"; 
         const resultMessage = document.getElementById("result_message");
         resultMessage.style.visibility = "visible";
         resultMessage.style.animation = "fadeIn 1s ease, zoom-in-zoom-out 1s ease infinite"; 
@@ -149,7 +149,9 @@ async function checkAnswer() {
         }
 
         // Update the scores
-        updateScores(data.scores);
+        if (data.scores) {
+            updatePlayerList(data.scores);
+        }
 
         // Check for winner
         if (data.winner) {
@@ -162,19 +164,17 @@ async function checkAnswer() {
 }
 
 // Update the score display
-function updateScores(scores) {
-    const scoreContainer = document.getElementById("score");
-    if (scores && Array.isArray(scores)) {
-        scoreContainer.innerHTML = `Scores: ${scores.map(score => `${score.name}: ${score.points}`).join(' | ')}`;
+function updatePlayerList(players) {
+    const playerListContainer = document.getElementById("player-list");
+    if (players && Array.isArray(players)) {
+        playerListContainer.innerHTML = players
+            .map(player => `${player.name}: ${player.score}`)
+            .join("<br>");
     } else {
-        scoreContainer.innerHTML = "Scores: N/A"; // Handle undefined or invalid scores
+        playerListContainer.innerHTML = "No players online.";
     }
 }
-function checkWinner(playerScore) {
-    
-    
 
-}
 // Event listeners
 document.addEventListener("DOMContentLoaded", function () {
     const submitButton = document.getElementById("submit_button");
@@ -190,12 +190,33 @@ document.addEventListener("DOMContentLoaded", function () {
 // Connect to WebSocket
 const socket = new WebSocket('ws://localhost:8080/ws');
 
+const name = localStorage.getItem("username");
+
+// Send username to server after connection is open
+socket.onopen = function () {
+    if (name) {
+        socket.send(JSON.stringify({
+            type: "register",
+            payload: {
+                username: name,
+            },
+        }));
+    } else {
+        console.error("Username not found in local storage.");
+    }
+};
+
 // Handle WebSocket messages
 socket.addEventListener('message', (event) => {
     const message = JSON.parse(event.data);
 
     console.log('Received message:', message);
     const gameover = document.getElementById("game-over-container");
+   
+    if (message.type === "player_list") {
+        console.log("Updated player list:", message.payload.players);
+        updatePlayerList(message.payload.players);  // Function to update UI
+    }
     if (message.type === 'game_over') {
         const winner = message.payload.winner;
         const currentUser = localStorage.getItem("username");

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"scrambled_words/shared"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
@@ -27,9 +28,10 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	shared.Mu.Lock()
 	shared.Clients[conn] = true
 	shared.Mu.Unlock()
+
 	log.Printf("New WebSocket connection. Total clients: %d\n", len(shared.Clients))
 
-	// Listen for messages and respond (optional)
+	// Listen for messages
 	for {
 		var msg shared.Message
 		err := conn.ReadJSON(&msg)
@@ -37,6 +39,18 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			log.Println("WebSocket read error:", err)
 			break
 		}
+
+		// Handle the "register" message
+		if msg.Type == "register" {
+			shared.Mu.Lock()
+			username := msg.Payload.(map[string]interface{})["username"].(string)
+			shared.Players[conn] = shared.Player{Name: username, Score: 0}
+			shared.Mu.Unlock()
+
+			// Broadcast updated player list
+			broadcastPlayerList()
+		}
+
 		// Example: Broadcast the received message
 		shared.Broadcast <- msg
 	}
@@ -44,6 +58,48 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	// Unregister client
 	shared.Mu.Lock()
 	delete(shared.Clients, conn)
+	delete(shared.Players, conn)
 	shared.Mu.Unlock()
 	log.Printf("WebSocket disconnected. Total clients: %d\n", len(shared.Clients))
+
+	// Broadcast updated player list
+	broadcastPlayerList()
+}
+
+// Helper function to broadcast the list of connected players and their scores
+func broadcastPlayerList() {
+	log.Println("Acquiring lock in broadcastPlayerList()")
+	shared.Mu.Lock() // Lock the mutex
+	defer func() {
+		log.Println("Releasing lock in broadcastPlayerList()")
+		shared.Mu.Unlock() // Ensure unlock only happens once
+	}()
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Recovered from panic in broadcastPlayerList:", r)
+		}
+	}()
+
+	playerList := []gin.H{}
+	for _, player := range shared.Players {
+		playerList = append(playerList, gin.H{
+			"name":  player.Name,
+			"score": player.Score,
+		})
+	}
+
+	message := shared.Message{
+		Type:    "player_list",
+		Payload: gin.H{"players": playerList},
+	}
+
+	for conn := range shared.Players {
+		err := conn.WriteJSON(message)
+		if err != nil {
+			log.Println("Error broadcasting to client:", err)
+			conn.Close()
+			delete(shared.Players, conn)
+		}
+	}
 }
