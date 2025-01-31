@@ -170,6 +170,7 @@ function updatePlayerList(players) {
         playerListContainer.innerHTML = players
             .map(player => `${player.name}: ${player.score}`)
             .join("<br>");
+        
     } else {
         playerListContainer.innerHTML = "No players online.";
     }

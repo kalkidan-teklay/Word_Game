@@ -2,7 +2,27 @@ body{
     background: linear-gradient(to bottom, #010b16, #152231);
     font-family: cursive;
     position: relative; 
+    display: flex;
+    /* justify-content: center; 
+    align-items: center; */
+    height: 100vh;
+    
+
 }
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 200px; 
+    padding: 20px;
+    border-style: solid;
+    border-color: #003366;
+    color: white;
+    height: 100vh; 
+    position: fixed;
+    margin-left: 20px;
+}
+
 
 .container {
     /* background-color: rgba(189, 125, 82, 0.815); */
@@ -18,7 +38,7 @@ body{
     
     width: 680px;
     height: 500px;
-    margin-top: 0px;
+    margin-top: 100px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: auto;

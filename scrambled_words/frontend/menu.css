@@ -1,0 +1,104 @@
+body {
+            /* background-image: url(../images/wallpapers.jpg); */
+            background: linear-gradient(to bottom, #010b16, #152231);
+            background-repeat: no-repeat;
+            font-family: cursive;
+            background-size: cover;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .logo{
+            background-image: url(../images/logo\ frame.jpg);
+            width: 340px;
+            height:132px;
+            background-repeat: no-repeat;
+            background-size: contain; 
+            background-position: center; 
+            margin-left: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            align-self: center;
+    
+        }
+        .title{
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 40px;
+            margin-left: 30px;
+    
+        }
+
+        nav {
+            padding: 20px;
+        }
+
+        .menu {
+            background-color: transparent; 
+            color: #ffffff; 
+            /* box-shadow: 0 2px 5px rgba(173, 216, 230, 0.8); */
+           
+            filter: drop-shadow(0 0 1px rgba(173, 216, 230, 0.8));
+            border-radius: 25px;
+            cursor: pointer; 
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+            gap: 20px;
+            /* background-color: rgba(235, 177, 201, 0.8); */
+            height: 60px;
+            transition: 0.3s; 
+            width: 330px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-family: cursive;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        a {
+            text-decoration: none;
+            font-family: cursive;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            
+        }
+        button::after {
+            content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.6;
+        box-shadow: 0 0 1em 0.5em rgba(173, 216, 230, 0.8);
+        filter: blur(10px); 
+        z-index: -1; 
+        opacity: 0; 
+        transition: opacity 0.3s; 
+        
+    }
+
+
+    button:hover::after {
+        opacity: 1;
+    }
+
+    button:hover{
+    
+        transform: translateY(-2px);
+}
+
+
+        nav ul {
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+        }
