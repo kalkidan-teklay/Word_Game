@@ -133,7 +133,7 @@ async function checkAnswer() {
 
         if (data.correct) {
             resultMessage.textContent = "Correct!";
-            resultMessage.style.color = "rgb(51, 83, 4)";
+            resultMessage.style.color = "rgb(156, 236, 35);";
             const correctSound = document.getElementById("correct_sound");
                 correctSound.play(); 
             word = data.new_word;
@@ -223,10 +223,21 @@ socket.addEventListener('message', (event) => {
         gameover.style.visibility = "visible";
         if (currentUser === winner) {
             gameover.innerHTML = "🎉🎉YOU WON THE GAME!!"
+            gameover.style.color = "white";
+          
+            gameover.style.fontSize = "24px"; 
+            gameover.style.textAlign = "center"; 
+            gameover.style.fontWeight = "bold"; 
             //alert("You won the game!");
         } else {
             gameover.innerHTML = "GAME OVER"
+            
             alert(`${winner} won the game!`);
+            gameover.style.color = "white";
+            gameover.style.margin = "20px";
+            gameover.style.fontSize = "24px"; 
+            gameover.style.textAlign = "center"; 
+            gameover.style.fontWeight = "bold"; 
         }
         setTimeout(() => {
             window.location.href = "./menu.html";   
