@@ -26,6 +26,18 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+func LoadGameState() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	storedState, err := db.LoadGameState()
+	if err == nil {
+		gameState = *storedState
+	} else {
+		gameState = models.GameState{}
+	}
+}
+
 // Generate a random word and shuffle it
 func generateWord() string {
 	words := []string{"apple", "banana", "cherry", "grape", "orange"}
@@ -67,6 +79,7 @@ func JoinGame(c *gin.Context) {
 		"player":       player,
 		"joined_users": playerNames, // List of player names
 	})
+	db.SaveGameState(&gameState)
 }
 
 func CheckMenu(c *gin.Context) {
@@ -131,6 +144,7 @@ func StartGame(c *gin.Context) {
 
 		"word": gameState.Shuffled,
 	})
+	db.SaveGameState(&gameState)
 }
 
 // Submit answer
@@ -211,6 +225,7 @@ func SubmitAnswer(c *gin.Context) {
 			}
 		} else {
 			generateWord()
+
 		}
 
 		c.JSON(http.StatusOK, gin.H{
@@ -227,6 +242,8 @@ func SubmitAnswer(c *gin.Context) {
 			"scores":  getScores(), // Include scores in the response
 		})
 	}
+
+	db.SaveGameState(&gameState)
 
 }
 
@@ -284,4 +301,5 @@ func LeaveGame(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Player left the game",
 	})
+	db.SaveGameState(&gameState)
 }

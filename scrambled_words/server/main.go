@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"scrambled_words/controllers"
 	"scrambled_words/db"
 	"scrambled_words/routes"
 	"scrambled_words/shared"
@@ -57,6 +58,8 @@ func main() {
 	})
 
 	routes.RegisterRoutes(r)
+	db.InitRedis()
+	controllers.LoadGameState()
 
 	// Start the server
 	log.Println("Server is running on http://localhost:8080")

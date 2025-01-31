@@ -3,107 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./login.css">
     <title>Login</title>
-    <style>
-        body {
-            background-image: url(../images/wallpapers.jpg);
-            background-repeat: no-repeat;
-            font-family: cursive;
-            background-size: cover;
-            font-family: cursive;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+    
 
-        .container {
-            background-color: rgba(235, 177, 201, 0.8);
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-        }
-
-        h2 {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: rgba(189, 65, 117, 0.8);
-            border: none;
-            color: white;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: rgba(129, 38, 76, 0.8);
-        }
-
-        #message {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .error {
-            color: red;
-            font-size: 0.9em;
-        }
-
-        .password-hint {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .password-strength {
-            margin-top: 5px;
-        }
-
-        .password-strength div {
-            height: 5px;
-            border-radius: 4px;
-        }
-
-        .weak {
-            width: 33%;
-            background-color: red;
-        }
-
-        .medium {
-            width: 66%;
-            background-color: orange;
-        }
-
-        .strong {
-            width: 100%;
-            background-color: green;
-        }
-    </style>
+        
 </head>
 
 <body>
@@ -112,11 +16,16 @@
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+                <div id = "input_boxes" class = "input_boxes">
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
+                <div id = "input_boxes" class = "input_boxes">
                 <input type="password" id="password" name="password" required>
+                <div id = "input_boxes" class = "input_boxes"></div>
             </div>
             <button type="submit">Login</button>
         </form>
