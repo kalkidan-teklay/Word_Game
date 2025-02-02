@@ -257,10 +257,6 @@ func SubmitAnswer(c *gin.Context) {
 		log.Printf("New word assigned from DB: %s (Update result: %v)", player.Word, updateResult)
 	}
 
-	// Ensure frontend gets the correct word
-	frontendWord := shuffleString(player.Word)
-	log.Println("frontendWord", frontendWord)
-
 	// **Check if the guess is correct**
 	normalizedWord := strings.ToLower(player.Word)
 	normalizedGuess := strings.ToLower(request.Guess)
@@ -326,8 +322,12 @@ func SubmitAnswer(c *gin.Context) {
 			})
 		} else {
 			c.JSON(http.StatusOK, gin.H{
-				"message":  "Correct! New word assigned.",
-				"correct":  true,
+				"message": "Correct! New word assigned.",
+				"correct": true,
+				"player": gin.H{
+					"name":  player.Name,
+					"score": player.Score,
+				},
 				"new_word": shuffleString(newWord),
 				"scores":   getScores(),
 			})
