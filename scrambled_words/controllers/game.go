@@ -126,45 +126,105 @@ func CheckMenu(c *gin.Context) {
 		"success": true,
 	})
 }
-func StartGame(c *gin.Context) {
-	mu.Lock()
-	defer mu.Unlock()
 
-	for i := range gameState.Players {
-		gameState.Players[i].Score = 0
+func StartGame(c *gin.Context) {
+	shared.Mu.Lock()
+	defer shared.Mu.Unlock()
+
+	// Extract the player ID from the request
+	var request struct {
+		PlayerID string `json:"player_id"`
+	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
 	}
 
-	if !gameState.Started {
-		generateWord()
-		gameState.Started = true
+	// Convert the PlayerID string to primitive.ObjectID
+	playerID, err := primitive.ObjectIDFromHex(request.PlayerID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Player ID"})
+		return
+	}
+
+	// Generate a new word for the game
+	newWord := generateWord()
+
+	// Get the players collection
+	collection := db.GetCollection("scrambled_words", "users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Find the player who called the function
+	var targetPlayer *shared.Player
+	for conn, player := range shared.Players {
+		if player.ID == playerID {
+			targetPlayer = &player
+
+			// Update the player's word in the database
+			_, err := collection.UpdateOne(
+				ctx,
+				bson.M{"_id": playerID},
+				bson.M{"$set": bson.M{"word": newWord}},
+			)
+			if err != nil {
+				log.Printf("Failed to update player word: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update player word"})
+				return
+			}
+
+			// Update the in-memory player state
+			player.Word = newWord
+			shared.Players[conn] = player
+			break
+		}
+	}
+
+	if targetPlayer == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Player not found"})
+		return
+	}
+
+	// Broadcast the new word only to the player who called the function
+	message := shared.Message{
+		Type:    "start_game",
+		Payload: gin.H{"word": newWord},
+	}
+
+	// Find the connection for the target player and send the message
+	for conn, player := range shared.Players {
+		if player.ID == playerID {
+			err := conn.WriteJSON(message)
+			if err != nil {
+				log.Println("Error sending message to client:", err)
+				conn.Close()
+				delete(shared.Clients, conn)
+				delete(shared.Players, conn)
+			}
+			break
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-
-		"word": gameState.Shuffled,
+		"word":    newWord,
 	})
-	db.SaveGameState(&gameState)
 }
 
-// Submit answer
 func SubmitAnswer(c *gin.Context) {
 	log.Println("Acquiring lock in SubmitAnswer()")
 	shared.Mu.Lock()
 	defer shared.Mu.Unlock()
-	log.Println("Releasing lock in SubmitAnswer()")
 
 	var request struct {
 		PlayerID string `json:"player_id"`
 		Guess    string `json:"guess"`
 	}
-
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	// Get the player from the database
 	collection := db.GetCollection("scrambled_words", "users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -175,25 +235,56 @@ func SubmitAnswer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Player ID"})
 		return
 	}
-	err = collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&player)
 
-	// Check the answer
-	if strings.ToLower(request.Guess) == strings.ToLower(gameState.Word) {
-		// Update the player's score in the database
-		player.Score++
-		_, err := collection.UpdateOne(
-			ctx,
-			bson.M{"_id": objID},
-			bson.M{"$set": bson.M{"score": player.Score}},
-		)
+	err = collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&player)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Player not found"})
+		return
+	}
+
+	// **Always Use the Word from the Database**
+	log.Printf("Player ID: %s - Retrieved Word from DB: %s", request.PlayerID, player.Word)
+
+	// If the word in the database is empty or missing, assign a new one
+	if player.Word == "" {
+		player.Word = generateWord()
+		updateResult, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": bson.M{"word": player.Word}})
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update score"})
+			log.Println("Error assigning word to player:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign word"})
 			return
 		}
+		log.Printf("New word assigned from DB: %s (Update result: %v)", player.Word, updateResult)
+	}
 
+	// Ensure frontend gets the correct word
+	frontendWord := shuffleString(player.Word)
+	log.Println("frontendWord", frontendWord)
+
+	// **Check if the guess is correct**
+	normalizedWord := strings.ToLower(player.Word)
+	normalizedGuess := strings.ToLower(request.Guess)
+
+	log.Printf("Normalized Word from DB: %s, Normalized Guess: %s", normalizedWord, normalizedGuess)
+
+	if normalizedGuess == normalizedWord {
+		player.Score++
+
+		// Assign a new word
+		newWord := generateWord()
+		updateResult, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": bson.M{"word": newWord, "score": player.Score}})
+		if err != nil {
+			log.Println("Error updating word in DB:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update word"})
+			return
+		}
+		log.Printf("New word updated in DB: %s (Update result: %v)", newWord, updateResult)
+
+		// Update in-memory player list
 		for conn, p := range shared.Players {
 			if p.Name == player.Name {
 				p.Score = player.Score
+				p.Word = newWord
 				shared.Players[conn] = p
 				break
 			}
@@ -206,45 +297,50 @@ func SubmitAnswer(c *gin.Context) {
 			gameState.Started = false
 			log.Println("Broadcasting game over for winner:", player.Name)
 
-			shared.Broadcast <- shared.Message{
+			select {
+			case shared.Broadcast <- shared.Message{
 				Type: "game_over",
 				Payload: gin.H{
 					"winner":  player.Name,
 					"message": fmt.Sprintf("%s won the game!", player.Name),
 				},
+			}:
+				log.Println("Game over broadcast sent.")
+			default:
+				log.Println("Broadcast channel is full, dropping message!")
 			}
 
-			_, err := collection.UpdateOne(
-				ctx,
-				bson.M{"_id": objID},
-				bson.M{"$inc": bson.M{"wins": 1}}, // Increment the "wins" field
-			)
+			_, err := collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$inc": bson.M{"wins": 1}})
 			if err != nil {
+				log.Printf("Failed to update wins: %v", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update wins"})
 				return
 			}
-		} else {
-			generateWord()
 
+			c.JSON(http.StatusOK, gin.H{
+				"message":  fmt.Sprintf("%s won the game!", player.Name),
+				"correct":  true,
+				"player":   player,
+				"new_word": shuffleString(newWord),
+				"scores":   getScores(),
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"message":  "Correct! New word assigned.",
+				"correct":  true,
+				"new_word": shuffleString(newWord),
+				"scores":   getScores(),
+			})
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"message":  fmt.Sprintf("%s won the game!", player.Name),
-			"correct":  true,
-			"player":   player,
-			"new_word": gameState.Shuffled,
-			"scores":   getScores(), // Include scores in the response
-		})
 	} else {
+		log.Println("Incorrect guess. Try again.")
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Incorrect, try again!",
 			"correct": false,
-			"scores":  getScores(), // Include scores in the response
+			"scores":  getScores(),
 		})
 	}
-
-	db.SaveGameState(&gameState)
-
 }
 
 // Helper function to get scores of all online players

@@ -10,7 +10,7 @@ func RegisterRoutes(r *gin.Engine) {
 	r.POST("/signup", controllers.Signup)
 	r.POST("/login", controllers.Login)
 	r.POST("/join", controllers.JoinGame)
-	r.GET("/start", controllers.StartGame)
+	r.POST("/start", controllers.StartGame)
 	r.POST("/menu", controllers.CheckMenu)
 	r.POST("/submit", controllers.SubmitAnswer)
 	r.GET("/leaderboard", controllers.GetLeaderboard)

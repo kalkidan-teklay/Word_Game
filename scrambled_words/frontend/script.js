@@ -42,9 +42,14 @@ async function startGame() {
     }
 
     try {
+        const payload = {
+            player_id: userId, 
+           
+        };
         const response = await fetch('http://localhost:8080/start', {
-            method: 'GET',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
         });
         const data = await response.json();
 

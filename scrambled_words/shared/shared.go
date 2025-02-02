@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Message struct {
@@ -11,8 +12,10 @@ type Message struct {
 	Payload interface{} `json:"payload"`
 }
 type Player struct {
-	Name  string `json:"name"`
-	Score int    `json:"score"`
+	ID    primitive.ObjectID `json:"id" bson:"_id"`
+	Name  string             `json:"name"`
+	Score int                `json:"score"`
+	Word  string             `bson:"word"`
 }
 
 var (

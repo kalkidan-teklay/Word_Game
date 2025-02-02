@@ -1,12 +1,16 @@
 package controllers
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"scrambled_words/db"
+	"scrambled_words/models"
 	"scrambled_words/shared"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var upgrader = websocket.Upgrader{
@@ -44,7 +48,23 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 		if msg.Type == "register" {
 			shared.Mu.Lock()
 			username := msg.Payload.(map[string]interface{})["username"].(string)
-			shared.Players[conn] = shared.Player{Name: username, Score: 0}
+			var user models.User
+			collection := db.GetCollection("scrambled_words", "users")
+
+			err = collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
+			if err != nil {
+				log.Println("User not found:", err)
+				shared.Mu.Unlock()
+				return
+			}
+			shared.Players[conn] = shared.Player{ID: user.ID, Name: username, Score: 0}
+			player := models.Player{
+				Name:  shared.Players[conn].Name,
+				Score: shared.Players[conn].Score,
+			}
+
+			// Update the game state with the new player
+			gameState.Players = append(gameState.Players, player)
 			shared.Mu.Unlock()
 
 			// Broadcast updated player list
