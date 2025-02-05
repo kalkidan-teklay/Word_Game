@@ -23,6 +23,48 @@ body{
     margin-left: 20px;
 }
 
+@media (min-width: 481px) and (max-width: 768px) {
+    .sidebar {
+        border: none; 
+        margin-bottom: 50px;
+        width: 100px; 
+        padding: 10px;
+        /* position: relative; */
+        height: auto;
+        margin-left: 10px;
+        
+    }
+    .title{
+        font-size: 10px;
+    }
+
+    .container {
+        max-width: 90%;
+        height: auto;
+        margin-top: 50px;
+        padding: 10px;
+    }
+
+    .score_container {
+        flex-wrap: wrap; 
+        justify-content: center;
+        gap: 4px;
+    }
+
+
+    
+    
+    
+}
+@media (max-width: 480px) {
+    .sidebar {
+        border: none; 
+        width: 20px;
+        position: fixed;
+    }
+
+}
+
 
 .container {
     /* background-color: rgba(189, 125, 82, 0.815); */

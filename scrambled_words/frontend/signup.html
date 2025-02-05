@@ -6,7 +6,7 @@
     <title>Sign up</title>
     <style>
         body {
-            background-image: url(../images/wallpapers.jpg);
+            background: linear-gradient(to bottom, #010b16, #152231);
             background-repeat: no-repeat;
             font-family: cursive;
             background-size: cover;
@@ -20,14 +20,22 @@
         }
 
         .container {
-            background-color: rgba(235, 177, 201, 0.8);
-            padding: 20px;
-            border-radius: 5px;
+            border-radius: 25px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-style: solid;
+            
+            border-color: #003366;
+            background-color: transparent; 
+            box-shadow: 0 0 1em 0.5em rgba(173, 216, 230, 0.8);
+          
+            padding: 20px;
+           
+           
             width: 300px;
         }
 
         h2 {
+            color: white;
             margin-bottom: 20px;
             text-align: center;
         }
@@ -37,6 +45,7 @@
         }
 
         label {
+            color: white;
             display: block;
             margin-bottom: 5px;
         }
@@ -50,18 +59,57 @@
         }
 
         button {
+            background-color: transparent;
+            border-color: #003366;
+            
+            border-style: solid;
+             
+          
+            border-radius: 10px;
             width: 100%;
             padding: 10px;
-            background-color: rgba(189, 65, 117, 0.8);
-            border: none;
+           
+            
             color: white;
             border-radius: 10px;
             cursor: pointer;
         }
 
-        button:hover {
-            background-color: rgba(129, 38, 76, 0.8);
+       
+
+        a{
+        color: rgb(112, 112, 241);
         }
+
+        p{
+            color: white;
+        }
+
+        button::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.6;
+        box-shadow: 0 0 1em 0.5em rgba(173, 216, 230, 0.8);
+        filter: blur(10px); 
+        z-index: -1; 
+        opacity: 0; 
+        transition: opacity 0.3s; 
+    
+        }
+
+
+    button:hover::after {
+        opacity: 1;
+    }
+
+    button:hover{
+
+        transform: translateY(-2px);
+    } 
 
         #message {
             margin-top: 20px;

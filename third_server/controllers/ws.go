@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"scrambled_words/db"
-	"scrambled_words/models"
-	"scrambled_words/shared"
+	"third_server/db"
+	"third_server/models"
+	"third_server/shared"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -63,11 +63,7 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 				Name:  shared.Players[conn].Name,
 				Score: shared.Players[conn].Score,
 			}
-			playersCollection := db.GetCollection("scrambled_words", "players")
-			_, err = playersCollection.InsertOne(context.TODO(), player)
-			if err != nil {
-				log.Println("Failed to save player:", err)
-			}
+
 			// Update the game state with the new player
 			gameState.Players = append(gameState.Players, player)
 			shared.Mu.Unlock()

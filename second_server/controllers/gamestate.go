@@ -6,9 +6,9 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"scrambled_words/db"
-	"scrambled_words/models"
-	"scrambled_words/shared"
+	"second_server/db"
+	"second_server/models"
+	"second_server/shared"
 	"strings"
 	"sync"
 	"time"
@@ -147,42 +147,42 @@ func StartGame(c *gin.Context) {
 		return
 	}
 
-	// Generate a new word for the game
-	newWord := generateWord()
-
-	// Get the players collection
-	collection := db.GetCollection("scrambled_words", "users")
+	// Get the users collection (not players, because we are modifying user data)
+	userCollection := db.GetCollection("scrambled_words", "users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Find the player who called the function
-	var targetPlayer *shared.Player
+	// Find the player in the "users" collection
+	var targetPlayer shared.Player
+	err = userCollection.FindOne(ctx, bson.M{"_id": playerID}).Decode(&targetPlayer)
+	if err != nil {
+		log.Println("Player not found in users collection:", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Player not found"})
+		return
+	}
+
+	// Generate a new word for the game
+	newWord := generateWord()
+
+	// Update the player's word in the database
+	_, err = userCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": playerID},
+		bson.M{"$set": bson.M{"word": newWord}},
+	)
+	if err != nil {
+		log.Printf("Failed to update player word: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update player word"})
+		return
+	}
+
+	// Update the in-memory player state if the player is currently connected
 	for conn, player := range shared.Players {
 		if player.ID == playerID {
-			targetPlayer = &player
-
-			// Update the player's word in the database
-			_, err := collection.UpdateOne(
-				ctx,
-				bson.M{"_id": playerID},
-				bson.M{"$set": bson.M{"word": newWord}},
-			)
-			if err != nil {
-				log.Printf("Failed to update player word: %v", err)
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update player word"})
-				return
-			}
-
-			// Update the in-memory player state
 			player.Word = newWord
 			shared.Players[conn] = player
 			break
 		}
-	}
-
-	if targetPlayer == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Player not found"})
-		return
 	}
 
 	// Broadcast the new word only to the player who called the function

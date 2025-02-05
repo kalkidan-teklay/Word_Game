@@ -1,1 +1,3 @@
+GET http://localhost:9090/bookings/1
+Content-Type: application/json
 

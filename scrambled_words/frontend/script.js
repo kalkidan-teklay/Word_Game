@@ -42,9 +42,14 @@ async function startGame() {
     }
 
     try {
+        const payload = {
+            player_id: userId, 
+           
+        };
         const response = await fetch('http://localhost:8080/start', {
-            method: 'GET',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
         });
         const data = await response.json();
 
@@ -149,8 +154,8 @@ async function checkAnswer() {
         }
 
         // Update the scores
-        if (data.scores) {
-            updatePlayerList(data.scores);
+        if (data.player) {
+            updatePlayerList(data.player);
         }
 
         // Check for winner
@@ -166,14 +171,12 @@ async function checkAnswer() {
 // Update the score display
 function updatePlayerList(players) {
     const playerListContainer = document.getElementById("player-list");
-    if (players && Array.isArray(players)) {
+    
         playerListContainer.innerHTML = players
             .map(player => `${player.name}: ${player.score}`)
             .join("<br>");
         
-    } else {
-        playerListContainer.innerHTML = "No players online.";
-    }
+    
 }
 
 // Event listeners
