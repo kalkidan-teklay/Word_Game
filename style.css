@@ -69,7 +69,8 @@ body{
 .container {
     /* background-color: rgba(189, 125, 82, 0.815); */
    
-    background-image: url(../images/frame.jpg);
+    background-image: url(./images/frame.jpg);
+    
     
     background-repeat: no-repeat;
     background-size: contain; 
@@ -96,7 +97,7 @@ body{
 }
 
 .logo{
-    background-image: url(../images/logo\ frame.jpg);
+    background-image: url(./images/logo\ frame.jpg);
     width: 340px;
     height:132px;
     background-repeat: no-repeat;
@@ -263,7 +264,7 @@ button:hover{
 
     
 .game-over-container{
-    background-image: url(../images/gameoverframe.jpg);
+    background-image: url(./images/gameoverframe.jpg);
     
     background-repeat: no-repeat;
     background-size: contain; 
