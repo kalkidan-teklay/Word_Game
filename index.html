@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scrambled Words</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <style>
+    
+    body {
+      background: linear-gradient(to bottom, #010b16, #152231);
+      font-family: cursive;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    
+    .glow {
+      text-shadow: 0 0 10px rgba(173, 216, 230, 0.8), 0 0 20px rgba(173, 216, 230, 0.8), 0 0 30px rgba(173, 216, 230, 0.8);
+    }
+
+    
+    .container {
+      border-radius: 25px;
+      border: 2px solid #003366;
+      background-color: transparent;
+      box-shadow: 0 0 1em 0.5em rgba(173, 216, 230, 0.8);
+      padding: 20px;
+      width: 300px;
+      position: relative;
+      z-index: 10;
+    }
+
+    
+    .letter {
+      position: absolute;
+      color: rgba(173, 216, 230, 0.8);
+      font-size: 24px;
+      font-weight: bold;
+      animation: float 8s infinite ease-in-out; 
+    }
+
+    
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-22px) rotate(10deg); 
+      }
+    }
+  </style>
+</head>
+<body class="flex justify-center items-center h-screen">
+  
+  <div id="letters" class="absolute inset-0 overflow-hidden">
+    
+  </div>
+
+  
+  <div class="container text-center">
+    
+    <h1 class="text-6xl font-bold mb-4 text-white glow animate__animated animate__fadeInDown">
+      Scrambled Words
+    </h1>
+    
+    <p class="text-lg text-gray-300 mb-8 animate__animated animate__fadeInUp animate__delay-1s">
+      Unscramble the words, challenge your mind, and have fun!
+    </p>
+    
+    <a href="signup.html" class="bg-[#003366] hover:bg-[#152231] text-white font-semibold py-2 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 animate__animated animate__fadeInUp animate__delay-2s">
+      Get Started
+    </a>
+  </div>
+
+  
+  <script>
+    const lettersContainer = document.getElementById('letters');
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const colors = ['#ADD8E6', '#87CEEB', '#00BFFF', '#1E90FF', '#6495ED'];
+
+    
+    for (let i = 0; i < 50; i++) {
+      const letter = document.createElement('div');
+      letter.className = 'letter glow';
+      letter.textContent = letters[Math.floor(Math.random() * letters.length)];
+      letter.style.left = `${Math.random() * 100}vw`;
+      letter.style.top = `${Math.random() * 100}vh`;
+      letter.style.color = colors[Math.floor(Math.random() * colors.length)];
+      letter.style.animationDuration = `${Math.random() * 8 + 5}s`; 
+      lettersContainer.appendChild(letter);
+    }
+  </script>
+</body>
+</html>

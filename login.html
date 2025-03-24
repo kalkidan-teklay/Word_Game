@@ -27,7 +27,7 @@
                 <input type="password" id="password" name="password" required>
                 <div id = "input_boxes" class = "input_boxes"></div>
             </div>
-            <button type="submit">Login</button>
+            <button type="submit"><a href="./menu.html" style="text-decoration: none; color: white">Login</a></button>
         </form>
         <p >Don't have an account yet? <a href="./signup.html">Signup</a></p>
     </div>
@@ -54,11 +54,11 @@
         if (response.ok) {
             localStorage.setItem("userId", result.user_id);
             localStorage.setItem("username", result.username);
-            alert(result.message);
+            
             
             window.location.href = "./menu.html"; // Show success message
         } else {
-            alert(result.error); // Show error message
+            
         }
     } catch (error) {
         console.error("Error:", error);

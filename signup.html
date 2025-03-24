@@ -175,7 +175,7 @@
                     name="confirmPassword" required>
                 <span id="confirmPasswordError" class="error"></span>
             </div>
-            <button type="submit">Signup</button>
+            <button type="submit"><a href="./menu.html" style="text-decoration: none; color: white">Signup</a></button>
         </form>
         <p >Already have an account? <a href="./login.html">Login</a></p>
     </div>
@@ -204,10 +204,10 @@
             const result = await response.json();
     
             if (response.ok) {
-                alert(result.message);
+               
                 window.location.href = "./login.html";
             } else {
-                alert(result.error);
+               
             }
         });
     </script>

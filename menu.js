@@ -18,11 +18,7 @@ async function chooseMenu(gameType) {
     console.log("User ID:", userId);
     console.log("Game Type:", gameType);
 
-    if (!userId) {
-        alert("Please log in first.");
-        return;
-    }
-
+    
     try {
         const payload = {
             player_id: userId, 
@@ -44,7 +40,7 @@ async function chooseMenu(gameType) {
             window.location.href = "index.html"; 
             
         } else {
-            alert(data.message || 'Error starting the game.');
+            
         }
     } catch (error) {
         console.error('Error starting the game:', error);

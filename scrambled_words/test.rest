@@ -1,8 +1,0 @@
-GET http://localhost:8080/ws
-Content-Type: application/json
-
-"player": {
-        "id": "",
-        "name": "kal",
-        "score": 3
-    },

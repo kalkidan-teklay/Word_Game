@@ -70,6 +70,7 @@ body{
     /* background-color: rgba(189, 125, 82, 0.815); */
    
     background-image: url(../images/frame.jpg);
+    
     background-repeat: no-repeat;
     background-size: contain; 
     background-position: center; 
